@@ -1,36 +1,53 @@
 import { useEffect } from "react";
-import { createPortal } from "react-dom";
 import css from "./Modal.module.css";
+import { createPortal } from "react-dom";
 
 interface ModalProps {
-  children: React.ReactNode;
   onClose: () => void;
+  children: React.ReactNode;
 }
 
-const modalRoot = document.getElementById("modal-root") as HTMLElement;
-
-const Modal = ({ children, onClose }: ModalProps) => {
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [onClose]);
-
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.currentTarget === e.target) {
+export default function Modal({ onClose, children }: ModalProps) {
+  const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
       onClose();
     }
   };
 
-  return createPortal(
-    <div className={css.backdrop} onClick={handleBackdropClick}>
-      {/* Видалено e.stopPropagation() зсередини, оскільки handleBackdropClick вже виконує перевірку */}
-      <div className={css.modal}>{children}</div>
-    </div>,
-    modalRoot
-  );
-};
+  // ✅ Об'єднано: обробка Escape та керування overflow
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
 
-export default Modal;
+    document.addEventListener("keydown", handleKeyDown);
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [onClose]);
+
+  // ✅ Монтування прямо в document.body
+  return createPortal(
+    <div
+      className={css.backdrop}
+      role="dialog"
+      aria-modal="true"
+      onClick={handleBackdropClick}
+    >
+      <div className={css.modal}>
+        {/* Додаємо кнопку закриття (як було у прикладі колеги) */}
+        <button type="button" className={css.closeButton} onClick={onClose}>
+          ×
+        </button>
+        {children}
+      </div>
+    </div>,
+    document.body
+  );
+}
