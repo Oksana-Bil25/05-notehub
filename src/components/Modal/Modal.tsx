@@ -14,7 +14,6 @@ export default function Modal({ onClose, children }: ModalProps) {
     }
   };
 
-  // ✅ Об'єднано: обробка Escape та керування overflow
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -32,7 +31,6 @@ export default function Modal({ onClose, children }: ModalProps) {
     };
   }, [onClose]);
 
-  // ✅ Монтування прямо в document.body
   return createPortal(
     <div
       className={css.backdrop}
@@ -41,7 +39,6 @@ export default function Modal({ onClose, children }: ModalProps) {
       onClick={handleBackdropClick}
     >
       <div className={css.modal}>
-        {/* Додаємо кнопку закриття (як було у прикладі колеги) */}
         <button type="button" className={css.closeButton} onClick={onClose}>
           ×
         </button>
