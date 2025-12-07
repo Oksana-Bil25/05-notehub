@@ -1,8 +1,7 @@
 .error {
-  color: red;
+  color: #b91c1c;
+  background: #fff1f2;
+  border: 1px solid #fecaca;
   padding: 10px;
-  background: #ffe6e6;
-  border: 1px solid red;
-  border-radius: 4px;
-  margin-top: 10px;
+  border-radius: 6px;
 }

@@ -1,43 +1,53 @@
 import React from "react";
 import ReactPaginate from "react-paginate";
-import styles from "./Pagination.module.css";
+import css from "./Pagination.module.css";
 
 export interface PaginationProps {
-  page: number;
-  setPage: (page: number) => void;
+  currentPage: number;
   totalPages: number;
+  onPageChange: (page: number) => void;
 }
 
 const Pagination: React.FC<PaginationProps> = ({
-  page,
-  setPage,
+  currentPage,
   totalPages,
+  onPageChange,
 }) => {
-  const handlePageClick = (event: { selected: number }) => {
-    setPage(event.selected + 1);
+  const handlePageClick = (data: { selected: number }) => {
+    // React-Paginate використовує 0-індексацію, ми перетворюємо на 1-індексацію
+    onPageChange(data.selected + 1);
   };
 
-  if (totalPages <= 1) return null;
+  if (totalPages <= 1) {
+    return null;
+  }
 
   return (
-    <ReactPaginate
-      breakLabel="..."
-      nextLabel=">"
-      onPageChange={handlePageClick}
-      pageRangeDisplayed={3}
-      marginPagesDisplayed={1}
-      pageCount={totalPages}
-      forcePage={page - 1}
-      previousLabel="<"
-      containerClassName={styles.pagination}
-      pageClassName={styles.page}
-      pageLinkClassName={styles.link}
-      activeClassName={styles.active}
-      previousClassName={styles.page}
-      nextClassName={styles.page}
-      breakClassName={styles.page}
-      renderOnZeroPageCount={null}
-    />
+    <nav className={css.paginationContainer}>
+      {" "}
+      <ReactPaginate
+        previousLabel={"<"}
+        nextLabel={">"}
+        breakLabel={"..."}
+        pageCount={totalPages}
+        marginPagesDisplayed={2}
+        pageRangeDisplayed={3}
+        onPageChange={handlePageClick}
+        forcePage={currentPage - 1}
+        containerClassName={css.pagination}
+        pageClassName={css["pageItem"]}
+        pageLinkClassName={css["pageLink"]}
+        previousClassName={css["pageItem"]}
+        previousLinkClassName={css["pageLink"]}
+        nextClassName={css["pageItem"]}
+        nextLinkClassName={css["pageLink"]}
+        breakClassName={css["pageItem"]}
+        breakLinkClassName={css["pageLink"]}
+        activeClassName={css.active}
+        // Потрібно для бібліотеки
+        renderOnZeroPageCount={null}
+      />{" "}
+    </nav>
   );
 };
 

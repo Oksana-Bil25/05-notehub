@@ -1,94 +1,80 @@
-// src/components/NoteForm/NoteForm.tsx
-
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import type { FormikHelpers } from "formik";
+import css from "./NoteForm.module.css";
 import * as Yup from "yup";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { NoteFormData, NoteTag } from "../../types/note";
 
-import { createNote } from "../../services/noteService";
-import type { CreateNoteParams, NoteTag } from "../../types/note";
-
-const TAGS: NoteTag[] = ["Todo", "Work", "Personal", "Meeting", "Shopping"];
-
-const validationSchema = Yup.object({
-  title: Yup.string()
-    .min(3, "Минимум 3 символи")
-    .max(100, "Максимум 100 символів")
-    .required("Це поле обов’язкове"),
-
-  content: Yup.string().max(500, "Максимум 500 символів").optional(),
-
-  tag: Yup.mixed<NoteTag>().oneOf(TAGS, "Невірний тег").required("Оберіть тег"),
-});
-
-interface NoteFormProps {
-  onSuccess?: () => void;
+export interface NoteFormProps {
+  onSubmit: (data: NoteFormData) => void;
+  onClose: () => void;
 }
 
-export default function NoteForm({ onSuccess }: NoteFormProps) {
-  const queryClient = useQueryClient();
+// Yup схема для валідації
+const schema = Yup.object({
+  title: Yup.string().min(3).max(50).required("Title is required"),
+  content: Yup.string().max(500, "Content is too long"),
+  tag: Yup.mixed<NoteTag>()
+    .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"], "Invalid tag")
+    .required("Tag is required"),
+});
 
-  const mutation = useMutation({
-    mutationFn: createNote,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      onSuccess?.();
-    },
-  });
-
-  const initialValues: CreateNoteParams = {
+const NoteForm = ({ onSubmit, onClose }: NoteFormProps) => {
+  const initialValues: NoteFormData = {
     title: "",
     content: "",
     tag: "Todo",
   };
 
-  const handleSubmit = (
-    values: CreateNoteParams,
-    formikHelpers: FormikHelpers<CreateNoteParams>
-  ) => {
-    mutation.mutate(values);
-    formikHelpers.resetForm();
-  };
-
   return (
-    <div className="note-form">
-      <h2>Create Note</h2>
+    <Formik<NoteFormData>
+      initialValues={initialValues}
+      validationSchema={schema}
+      onSubmit={(values, { resetForm }) => {
+        onSubmit(values);
+        resetForm();
+      }}
+    >
+      <Form className={css.form}>
+        <div className={css.formGroup}>
+          <label htmlFor="title">Title</label>
+          <Field id="title" name="title" className={css.input} />
+          <ErrorMessage name="title" component="span" className={css.error} />
+        </div>
 
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ isSubmitting }) => (
-          <Form>
-            {/* Title */}
-            <label>Title</label>
-            <Field name="title" type="text" />
-            <ErrorMessage name="title" component="div" className="error" />
+        <div className={css.formGroup}>
+          <label htmlFor="content">Content</label>
+          <Field
+            id="content"
+            as="textarea"
+            name="content"
+            rows={8}
+            className={css.textarea}
+          />
+          <ErrorMessage name="content" component="span" className={css.error} />
+        </div>
 
-            {/* Content */}
-            <label>Content</label>
-            <Field as="textarea" name="content" />
-            <ErrorMessage name="content" component="div" className="error" />
+        <div className={css.formGroup}>
+          <label htmlFor="tag">Tag</label>
+          <Field id="tag" name="tag" as="select" className={css.select}>
+            <option value="Todo">Todo</option>
+            <option value="Work">Work</option>
+            <option value="Personal">Personal</option>
+            <option value="Meeting">Meeting</option>
+            <option value="Shopping">Shopping</option>
+          </Field>
+          <ErrorMessage name="tag" component="span" className={css.error} />
+        </div>
 
-            {/* Tag */}
-            <label>Tag</label>
-            <Field as="select" name="tag">
-              {TAGS.map((tag) => (
-                <option key={tag} value={tag}>
-                  {tag}
-                </option>
-              ))}
-            </Field>
-            <ErrorMessage name="tag" component="div" className="error" />
-
-            {/* Submit */}
-            <button type="submit" disabled={mutation.isPending || isSubmitting}>
-              {mutation.isPending ? "Saving..." : "Create Note"}
-            </button>
-          </Form>
-        )}
-      </Formik>
-    </div>
+        <div className={css.actions}>
+          <button type="button" className={css.cancelButton} onClick={onClose}>
+            Cancel
+          </button>
+          <button type="submit" className={css.submitButton}>
+            Create note
+          </button>
+        </div>
+      </Form>
+    </Formik>
   );
-}
+};
+
+export default NoteForm;

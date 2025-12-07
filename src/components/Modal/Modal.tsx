@@ -1,42 +1,36 @@
-import { useEffect, useCallback } from "react";
-import "./Modal.css";
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
+import css from "./Modal.module.css";
 
 interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
   children: React.ReactNode;
+  onClose: () => void;
 }
 
-export const Modal = ({ isOpen, onClose, children }: ModalProps) => {
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    },
-    [onClose]
-  );
+const modalRoot = document.getElementById("modal-root") as HTMLElement;
 
+const Modal = ({ children, onClose }: ModalProps) => {
   useEffect(() => {
-    if (!isOpen) return;
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
     };
-  }, [isOpen, handleKeyDown]); // <-- ESLint satisfied
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [onClose]);
 
-  if (!isOpen) return null;
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.currentTarget === e.target) {
+      onClose();
+    }
+  };
 
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div
-        className="modal-content"
-        onClick={(e) => e.stopPropagation()} // stop closing when clicking inside
-      >
-        {children}
-      </div>
-    </div>
+  return createPortal(
+    <div className={css.backdrop} onClick={handleBackdropClick}>
+      {/* Видалено e.stopPropagation() зсередини, оскільки handleBackdropClick вже виконує перевірку */}
+      <div className={css.modal}>{children}</div>
+    </div>,
+    modalRoot
   );
 };
+
+export default Modal;

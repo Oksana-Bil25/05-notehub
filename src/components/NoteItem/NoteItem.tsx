@@ -1,18 +1,20 @@
+import css from "./NoteItem.module.css";
+import type { Note } from "../../types/note";
+
 interface NoteItemProps {
   note: Note;
   onDelete: (id: string) => void;
 }
 
-const NoteItem: React.FC<NoteItemProps> = ({ note, onDelete }) => {
+const NoteItem = ({ note, onDelete }: NoteItemProps) => {
   return (
-    <li className={styles.listItem}>
-      <h3 className={styles.title}>{note.title}</h3>
-      <p className={styles.content}>{note.content}</p>
-
-      <div className={styles.footer}>
-        <span className={styles.tag}>{note.tag}</span>
-
-        <button className={styles.button} onClick={() => onDelete(note._id)}>
+    // ✅ NoteItem має бути li
+    <li className={css.listItem}>
+      <h2 className={css.title}>{note.title}</h2>
+      <p className={css.content}>{note.content}</p>
+      <div className={css.footer}>
+        <span className={css.tag}>{note.tag}</span>
+        <button className={css.button} onClick={() => onDelete(note.id)}>
           Delete
         </button>
       </div>
