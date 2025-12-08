@@ -10,7 +10,8 @@ import {
   deleteNote,
   type FetchNotesParams,
 } from "../../services/noteService";
-import type { NoteFormData, FetchNotesResponse } from "../../types/note";
+import type { NoteFormData } from "../../types/note";
+import type { FetchNotesResponse } from "../../types/response";
 
 import NoteList from "../NoteList/NoteList";
 import SearchBox from "../SearchBox/SearchBox";

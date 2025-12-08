@@ -1,10 +1,11 @@
 import axios from "axios";
-import type { Note, NoteFormData, FetchNotesResponse } from "../types/note";
 
-// Змінні оточення доступні через import.meta.env у Vite
+import type { Note, NoteFormData } from "../types/note";
+
+import type { FetchNotesResponse } from "../types/response";
+
 const TOKEN = import.meta.env.VITE_NOTEHUB_TOKEN;
 
-// ❗ Використовуємо URL з ТЗ
 const api = axios.create({
   baseURL: "https://notehub-public.goit.study/api",
   headers: {
@@ -12,16 +13,12 @@ const api = axios.create({
   },
 });
 
-// Додаємо Bearer Token
 if (TOKEN) {
   api.defaults.headers.common["Authorization"] = `Bearer ${TOKEN}`;
 } else {
   console.warn("VITE_NOTEHUB_TOKEN is not set. API calls may fail.");
 }
 
-// -----------------------------------------------------
-
-/** Параметри для запиту (пагінація та пошук) */
 export interface FetchNotesParams {
   page?: number;
   perPage?: number;
@@ -37,7 +34,6 @@ export const fetchNotes = async (
   return response.data;
 };
 
-// ---- CREATE NOTE ----
 export const createNote = async (data: NoteFormData): Promise<Note> => {
   const response = await api.post<Note>("/notes", data);
   return response.data;
