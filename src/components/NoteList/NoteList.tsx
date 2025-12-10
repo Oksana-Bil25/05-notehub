@@ -1,3 +1,6 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { deleteNote } from "../../services/noteService";
 
 import NoteItem from "../NoteItem/NoteItem";
 import type { Note } from "../../types/note";
@@ -5,11 +8,24 @@ import css from "./NoteList.module.css";
 
 export interface NoteListProps {
   notes: Note[];
-  onDelete: (id: string) => void;
 }
 
-const NoteList = ({ notes, onDelete }: NoteListProps) => {
-  // Фільтр не потрібен, якщо API завжди повертає валідні дані, але залишаємо для безпеки
+const NoteList = ({ notes }: NoteListProps) => {
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      toast.success("Note deleted successfully!");
+    },
+    onError: () => toast.error("Failed to delete note."),
+  });
+
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id);
+  };
+
   const renderableNotes = notes.filter((note) => note.id);
 
   if (renderableNotes.length === 0) {
@@ -19,7 +35,7 @@ const NoteList = ({ notes, onDelete }: NoteListProps) => {
   return (
     <ul className={css.list}>
       {renderableNotes.map((note) => (
-        <NoteItem key={note.id} note={note} onDelete={onDelete} />
+        <NoteItem key={note.id} note={note} onDelete={handleDelete} />
       ))}
     </ul>
   );

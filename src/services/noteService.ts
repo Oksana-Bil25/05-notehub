@@ -1,7 +1,6 @@
 import axios from "axios";
 
 import type { Note, NoteFormData } from "../types/note";
-
 import type { FetchNotesResponse } from "../types/response";
 
 const TOKEN = import.meta.env.VITE_NOTEHUB_TOKEN;
@@ -39,7 +38,7 @@ export const createNote = async (data: NoteFormData): Promise<Note> => {
   return response.data;
 };
 
-export const deleteNote = async (id: string): Promise<{ message: string }> => {
-  const response = await api.delete<{ message: string }>(`/notes/${id}`);
+export const deleteNote = async (id: string): Promise<Note> => {
+  const response = await api.delete<Note>(`/notes/${id}`);
   return response.data;
 };
