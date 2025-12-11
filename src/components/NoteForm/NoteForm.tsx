@@ -34,6 +34,7 @@ const NoteForm = ({ onClose }: NoteFormProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       toast.success("Note created successfully!");
+      onClose();
     },
 
     onError: (error) => {
@@ -50,7 +51,6 @@ const NoteForm = ({ onClose }: NoteFormProps) => {
         createNoteMutation.mutate(values, {
           onSettled: () => {
             resetForm();
-            onClose();
           },
         });
       }}
